@@ -7,46 +7,40 @@ from django.contrib.auth.models import User
 class FlashCard(models.Model):
     question = models.TextField()
     real_answer = models.TextField()
-    possible_answer = models.TextField(default=None)
+    possible_answers_json = models.TextField(default=None)  # Renamed field
 
     @property
-    def possible_answer(self):
+    def possible_answers(self):
         import json
+        return json.loads(self.possible_answers_json)
 
-        return json.loads(self.possible_answer)
-
-    @possible_answer.setter
-    def possible_answer(self, value):
+    @possible_answers.setter
+    def possible_answers(self, value):
         import json
-
-        self.possible_answer = json.dumps(value)
+        self.possible_answers_json = json.dumps(value)
 
 
 class UserAnswer(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_answer")
-    card = models.TextField()
-    log = models.TextField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_answers")  # Renamed related_name
+    flashcard_data_json = models.TextField()  # Renamed field
+    answer_log_json = models.TextField()  # Renamed field
 
     @property
-    def card(self):
+    def flashcard_data(self):
         import json
+        return json.loads(self.flashcard_data_json)
 
-        return json.loads(self.card)
-
-    @card.setter
-    def card(self, value):
+    @flashcard_data.setter
+    def flashcard_data(self, value):
         import json
-
-        self.card = json.dumps(value)
+        self.flashcard_data_json = json.dumps(value)
 
     @property
-    def log(self):
+    def answer_log(self):
         import json
+        return json.loads(self.answer_log_json)
 
-        return json.loads(self.log)
-
-    @log.setter
-    def log(self, value):
+    @answer_log.setter
+    def answer_log(self, value):
         import json
-
-        self.log = json.dumps(value)
+        self.answer_log_json = json.dumps(value)
