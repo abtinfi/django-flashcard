@@ -6,4 +6,8 @@ app_name = "home"
 
 urlpatterns = [
     path("", views.HomeView.as_view(), name="home"),
+    path(
+        "flashcard/<int:card_id>", views.ShowAnswerFlashcard.as_view(), name="show_card"
+    ),
+    
 ]
