@@ -1,5 +1,4 @@
 from django.urls import path
-
 from . import views
 
 app_name = "home"
@@ -9,5 +8,5 @@ urlpatterns = [
     path(
         "flashcard/<int:card_id>", views.ShowAnswerFlashcard.as_view(), name="show_card"
     ),
-    
+    path("login/", views.UserLoginView.as_view(), name="user_login")
 ]
