@@ -18,15 +18,13 @@ class UserRegisterForm(forms.Form):
 
     def clean_email(self):
         email = self.cleaned_data["email"]
-        user = User.objects.filter(email=email).exists()
-        if user:
+        if user := User.objects.filter(email=email).exists():
             raise ValidationError("this email already exists")
         return email
 
     def clean_username(self):
         username = self.cleaned_data["username"]
-        user = User.objects.filter(username=username).exists()
-        if user:
+        if user:=User.objects.filter(username=username).exists():
             raise ValidationError("this username already exists")
         return username
 
@@ -35,7 +33,7 @@ class UserRegisterForm(forms.Form):
         p1 = cd.get("password")
         p2 = cd.get("confirm_password")
 
-        if p1 and p2 and p1 and p1 != p2:
+        if p1 and p2 and p1 != p2:
             raise ValidationError("passwords must mach")
 
 
