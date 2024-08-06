@@ -2,13 +2,27 @@
 
 {% block content %}
   <center>
-    <h1>wellcome to simple flashcard website</h1>
+    <h1>Welcome to flashcard website</h1>
   </center>
-  <div style="height: 40px;"></div>
-  <p style="font-size: large;">
-    to start the app click on the <mark style="background-color: aquamarine;">start</mark> button
-  </p>
-  <center>
-    <a href=""><button>start</button></a>
-  </center>
+  {% if request.user.is_authenticated %}
+    <div style="height: 40px;"></div>
+    <p style="font-size: large;">
+      To start the app click on the <mark style="background-color: aquamarine;">start</mark> button
+    </p>
+    <center>
+      <a><button>start</button></a>
+    </center>
+  {% else %}
+    <style>
+      .login-text {
+        font-size: 18px;
+      }
+    </style>
+
+    <div style="padding-top: 50px;">
+      <p class="login-text">
+        please <a href="{% url 'home:user_login' %}"><button>login</button></a> or <a href="{% url 'home:user_register' %}"><button>sign up</button></a> to access flashcards
+      </p>
+    </div>
+  {% endif %}
 {% endblock %}
