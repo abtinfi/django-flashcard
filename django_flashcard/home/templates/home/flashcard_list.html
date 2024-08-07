@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Due Flashcards</h1>
+  <ul>
+    {% for flashcard in flashcards %}
+      <li>
+        <a href="{% url 'home:review_flashcard' flashcard.pk %}">{{ flashcard.question }}</a>
+      </li>
+    {% empty %}
+      <li>No due flashcards</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
