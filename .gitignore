@@ -136,12 +136,4 @@ GitHub.sublime-settings
 !.vscode/launch.json 
 !.vscode/extensions.json 
 .history
-django_flashcard/api/__pycache__/models.cpython-311.pyc
-django_flashcard/api/__pycache__/views.cpython-311.pyc
-django_flashcard/home/__pycache__/admin.cpython-311.pyc
-django_flashcard/home/__pycache__/views.cpython-311.pyc
-django_flashcard/home/__pycache__/urls.cpython-311.pyc
-django_flashcard/home/__pycache__/models.cpython-311.pyc
-django_flashcard/home/__pycache__/admin.cpython-311.pyc
-django_flashcard/api/__pycache__/views.cpython-311.pyc
-django_flashcard/api/__pycache__/models.cpython-311.pyc
+__pycache__/
