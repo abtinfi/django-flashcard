@@ -4,7 +4,11 @@
   <h1>{{ flashcard.question }}</h1>
   <form method="post">
     {% csrf_token %}
-    <p>{{ flashcard.real_answer }}</p>
+    
+    {% for item in flashcard.possible_answers  %}
+      <p>{{item}}</p>
+    {% endfor %}
+      
     {{ form.as_p }}
     <button type="submit">Submit Review</button>
   </form>
