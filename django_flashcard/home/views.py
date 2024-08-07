@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, UpdateView
-from .forms import FlashCardForm, ReviewForm
+from .forms import FlashCardForm, ReviewForm, AnswerForm
 from api.models import FlashCard, UserFlashCard
 from fsrs import FSRS, Card, ReviewLog, Rating
 from datetime import datetime, timezone
@@ -151,3 +151,43 @@ class FlashCardReviewView(LoginRequiredMixin, View):
             user_flashcard.save()
             return redirect('home:flashcard_list')
         return render(request, self.template_name, {'flashcard': flashcard, 'form': form})
+
+
+
+class FlashCardQuestionView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        flashcard = get_object_or_404(FlashCard, pk=pk)
+        form = AnswerForm(choices=[(ans, ans) for ans in flashcard.possible_answers])
+        return render(request, 'home/flashcard_question.html', {'flashcard': flashcard, 'form': form})
+
+    def post(self, request, pk):
+        flashcard = get_object_or_404(FlashCard, pk=pk)
+        form = AnswerForm(request.POST, choices=[(ans, ans) for ans in flashcard.possible_answers])
+        if form.is_valid():
+            selected_answer = form.cleaned_data['selected_answer']
+            return redirect('home:flashcard_result', pk=pk, selected_answer=selected_answer)
+        return render(request, 'home/flashcard_question.html', {'flashcard': flashcard, 'form': form})
+
+
+class FlashCardResultView(LoginRequiredMixin, View):
+    def get(self, request, pk, selected_answer):
+        flashcard = get_object_or_404(FlashCard, pk=pk)
+        is_correct = (selected_answer == flashcard.real_answer)
+        # به‌روزرسانی داده‌های فلش کارت با استفاده از FSRS
+        user_flashcard, created = UserFlashCard.objects.get_or_create(
+            user=request.user,
+            flashcard=flashcard,
+            defaults={'card_data': Card().to_dict()}
+        )
+        f = FSRS()
+        card = Card.from_dict(user_flashcard.card_data)
+        rate = Rating(4 if is_correct else 1)  # مثال: 4 برای درست و 1 برای غلط
+        if user_flashcard.review_log:
+            review_log = ReviewLog.from_dict(user_flashcard.review_log)
+            card, review_log = f.review_card(card, rate)
+        else:
+            card, review_log = f.review_card(card, rate)
+        user_flashcard.card_data = card.to_dict()
+        user_flashcard.review_log = review_log.to_dict()
+        user_flashcard.save()
+        return render(request, 'home/flashcard_result.html', {'flashcard': flashcard, 'is_correct': is_correct})

@@ -59,3 +59,12 @@ class ReviewForm(forms.Form):
         (4, 'Easy'),
     ]
     rating = forms.ChoiceField(choices=RATING_CHOICES, widget=forms.RadioSelect)
+
+
+class AnswerForm(forms.Form):
+    selected_answer = forms.ChoiceField(choices=[], widget=forms.RadioSelect)
+
+    def __init__(self, *args, **kwargs):
+        choices = kwargs.pop('choices', [])
+        super().__init__(*args, **kwargs)
+        self.fields['selected_answer'].choices = choices

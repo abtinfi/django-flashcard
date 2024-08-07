@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Result</h1>
+  {% if is_correct %}
+    <p>Your answer is correct!</p>
+  {% else %}
+    <p>Your answer is incorrect. The correct answer is {{ flashcard.real_answer }}.</p>
+  {% endif %}
+  <a href="{% url 'home:flashcard_list' %}">Back to Flashcards</a>
+{% endblock %}
