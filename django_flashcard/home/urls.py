@@ -12,11 +12,6 @@ urlpatterns = [
     path("register/", views.UserRegisterView.as_view(), name="user_register"),
     path("logout/", views.UserLogoutViwe.as_view(), name="user_logout"),
     path("flashcards/add/", views.FlashCardCreateView.as_view(), name="add_flashcard"),
-    path(
-        "flashcards/<int:pk>/review/",
-        views.FlashCardReviewView.as_view(),
-        name="review_flashcard",
-    ),
     path("flashcards/", views.FlashCardListView.as_view(), name="flashcard_list"),
     path(
         "flashcards/<int:pk>/question/",

@@ -2,13 +2,9 @@
 
 {% block content %}
   <h1>{{ flashcard.question }}</h1>
+  <p>Your answer is incorrect. The correct answer is {{ flashcard.real_answer }}.</p>
   <form method="post">
-    {% csrf_token %}
-    
-    {% for item in flashcard.possible_answers  %}
-      <p>{{item}}</p>
-    {% endfor %}
-      
+    {% csrf_token %}      
     {{ form.as_p }}
     <button type="submit">Submit Review</button>
   </form>

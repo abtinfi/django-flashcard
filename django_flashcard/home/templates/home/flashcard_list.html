@@ -5,7 +5,7 @@
   <ul>
     {% for flashcard in flashcards %}
       <li>
-        <a href="{% url 'home:review_flashcard' flashcard.pk %}">{{ flashcard.question }}</a>
+        <a href="{% url 'home:flashcard_question' flashcard.pk %}">{{ flashcard.question }}</a>
       </li>
     {% empty %}
       <li>No due flashcards</li>
