@@ -144,6 +144,24 @@ class FlashCardResultView(LoginRequiredMixin, View):
         )
         return super().dispatch(request, *args, **kwargs)
     
+    def process_incorrect_answer(self, f, card):
+        rate = Rating(Rating.Again)
+        self.update_user_flashcard(f, card, rate)
+        return render(self.request, 'home/flashcard_result.html', {'flashcard': self.flashcard, 'is_correct': self.is_correct})
+
+
+    def update_user_flashcard(self, f, card, rate):
+        review_log = (
+            ReviewLog.from_dict(self.user_flashcard.review_log)
+            if self.user_flashcard.review_log
+            else None
+        )
+        card, review_log = f.review_card(card, rate)
+        self.user_flashcard.card_data = card.to_dict()
+        self.user_flashcard.review_log = review_log.to_dict()
+        self.user_flashcard.save()
+
+
     def get(self, request, *args, **kwargs):
         f = FSRS()
         card = Card.from_dict(self.user_flashcard.card_data)
@@ -153,11 +171,6 @@ class FlashCardResultView(LoginRequiredMixin, View):
         else:
             return render(request, self.template_name, {'flashcard': self.flashcard, 'form': self.form_class()})
     
-    def process_incorrect_answer(self, f, card):
-        rate = Rating(Rating.Again)
-        self.update_user_flashcard(f, card, rate)
-        return render(self.request, 'home/flashcard_result.html', {'flashcard': self.flashcard, 'is_correct': self.is_correct})
-
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
         
@@ -173,14 +186,3 @@ class FlashCardResultView(LoginRequiredMixin, View):
         
         # If form is not valid, render the template again with errors
         return render(request, self.template_name, {'flashcard': self.flashcard, 'form': form})
-
-    def update_user_flashcard(self, f, card, rate):
-        review_log = (
-            ReviewLog.from_dict(self.user_flashcard.review_log)
-            if self.user_flashcard.review_log
-            else None
-        )
-        card, review_log = f.review_card(card, rate)
-        self.user_flashcard.card_data = card.to_dict()
-        self.user_flashcard.review_log = review_log.to_dict()
-        self.user_flashcard.save()
