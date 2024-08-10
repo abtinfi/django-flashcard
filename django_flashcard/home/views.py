@@ -133,6 +133,7 @@ class FlashCardQuestionView(LoginRequiredMixin, View):
 class FlashCardResultView(LoginRequiredMixin, View):
     form_class = ReviewForm
     template_name = 'home/review_flashcard.html'
+    
     def dispatch(self, request, *args, **kwargs):
         self.flashcard = get_object_or_404(FlashCard, pk=kwargs["pk"])
         self.is_correct = (self.flashcard.real_answer == kwargs["selected_answer"])
@@ -143,24 +144,20 @@ class FlashCardResultView(LoginRequiredMixin, View):
         )
         return super().dispatch(request, *args, **kwargs)
     
-    def get(self, request,*args, **kwargs):
+    def get(self, request, *args, **kwargs):
         f = FSRS()
         card = Card.from_dict(self.user_flashcard.card_data)
-        if self.is_correct == False:
-            rate = Rating(Rating.Again)
-            if self.user_flashcard.review_log:
-                review_log = ReviewLog.from_dict(self.user_flashcard.review_log)
-            else:
-                review_log = None
-            card, review_log = f.review_card(card, rate)
-            self.user_flashcard.card_data = card.to_dict()
-            self.user_flashcard.review_log = review_log.to_dict()
-            self.user_flashcard.save()
-            return render(request, 'home/flashcard_result.html', {'flashcard': self.flashcard, 'is_correct': self.is_correct, })
         
+        if not self.is_correct:
+            return self.process_incorrect_answer(f, card)
         else:
             return render(request, self.template_name, {'flashcard': self.flashcard, 'form': self.form_class()})
-        
+    
+    def process_incorrect_answer(self, f, card):
+        rate = Rating(Rating.Again)
+        self.update_user_flashcard(f, card, rate)
+        return render(self.request, 'home/flashcard_result.html', {'flashcard': self.flashcard, 'is_correct': self.is_correct})
+
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
         
@@ -170,18 +167,20 @@ class FlashCardResultView(LoginRequiredMixin, View):
             card = Card.from_dict(self.user_flashcard.card_data)
             rate = Rating(rating)
             
-            if self.user_flashcard.review_log:
-                review_log = ReviewLog.from_dict(self.user_flashcard.review_log)
-            else:
-                review_log = None
-            
-            card, review_log = f.review_card(card, rate)
-            
-            self.user_flashcard.card_data = card.to_dict()
-            self.user_flashcard.review_log = review_log.to_dict()
-            self.user_flashcard.save()
-            messages.success(request, "your reviewed successfully saved")
+            self.update_user_flashcard(f, card, rate)
+            messages.success(request, "Your review was successfully saved.")
             return redirect('home:flashcard_list')
         
         # If form is not valid, render the template again with errors
         return render(request, self.template_name, {'flashcard': self.flashcard, 'form': form})
+
+    def update_user_flashcard(self, f, card, rate):
+        review_log = (
+            ReviewLog.from_dict(self.user_flashcard.review_log)
+            if self.user_flashcard.review_log
+            else None
+        )
+        card, review_log = f.review_card(card, rate)
+        self.user_flashcard.card_data = card.to_dict()
+        self.user_flashcard.review_log = review_log.to_dict()
+        self.user_flashcard.save()
