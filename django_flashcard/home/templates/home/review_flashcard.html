@@ -2,7 +2,7 @@
 
 {% block content %}
   <h1>{{ flashcard.question }}</h1>
-  <p>Your answer is incorrect. The correct answer is {{ flashcard.real_answer }}.</p>
+  <p>Your answer is correct. now pleasw review your remember state</p>
   <form method="post">
     {% csrf_token %}      
     {{ form.as_p }}

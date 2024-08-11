@@ -118,6 +118,7 @@ class FlashCardListView(LoginRequiredMixin, ListView):
 class FlashCardQuestionView(LoginRequiredMixin, View):
     def get(self, request, pk):
         flashcard = get_object_or_404(FlashCard, pk=pk)
+        
         form = AnswerForm(choices=[(ans, ans) for ans in flashcard.possible_answers])
         return render(request, 'home/flashcard_question.html', {'flashcard': flashcard, 'form': form})
 
@@ -132,7 +133,8 @@ class FlashCardQuestionView(LoginRequiredMixin, View):
 
 class FlashCardResultView(LoginRequiredMixin, View):
     form_class = ReviewForm
-    template_name = 'home/review_flashcard.html'
+    template_true = 'home/review_flashcard.html'
+    template_false = 'home/flashcard_result.html'
     
     def dispatch(self, request, *args, **kwargs):
         self.flashcard = get_object_or_404(FlashCard, pk=kwargs["pk"])
@@ -147,7 +149,7 @@ class FlashCardResultView(LoginRequiredMixin, View):
     def process_incorrect_answer(self, f, card):
         rate = Rating(Rating.Again)
         self.update_user_flashcard(f, card, rate)
-        return render(self.request, 'home/flashcard_result.html', {'flashcard': self.flashcard, 'is_correct': self.is_correct})
+        return render(self.request, self.template_false, {'flashcard': self.flashcard, 'is_correct': self.is_correct})
 
 
     def update_user_flashcard(self, f, card, rate):
@@ -165,11 +167,12 @@ class FlashCardResultView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         f = FSRS()
         card = Card.from_dict(self.user_flashcard.card_data)
-        
+        if card.due >= datetime.now(timezone.utc) and self.user_flashcard.review_log:
+                return redirect('home:flashcard_list')
         if not self.is_correct:
             return self.process_incorrect_answer(f, card)
         else:
-            return render(request, self.template_name, {'flashcard': self.flashcard, 'form': self.form_class()})
+            return render(request, self.template_true, {'flashcard': self.flashcard, 'form': self.form_class(), 'is_correct': self.is_correct})
     
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
@@ -179,7 +182,8 @@ class FlashCardResultView(LoginRequiredMixin, View):
             f = FSRS()
             card = Card.from_dict(self.user_flashcard.card_data)
             rate = Rating(rating)
-            
+            if Card.from_dict(self.user_flashcard.card_data).due >= datetime.now(timezone.utc) and self.user_flashcard.review_log:
+                return redirect('home:flashcard_list')
             self.update_user_flashcard(f, card, rate)
             messages.success(request, "Your review was successfully saved.")
             return redirect('home:flashcard_list')
