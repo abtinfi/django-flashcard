@@ -135,6 +135,12 @@ class FlashCardResultView(LoginRequiredMixin, View):
             flashcard=self.flashcard,
             defaults={'card_data': Card().to_dict()}
         )
+        
+        # Check if the review time is invalid and redirect if so
+        if self.process_invalid_answer():
+            messages.warning(request, "This flashcard is not yet due for review.")
+            return redirect('home:flashcard_list')
+        
         return super().dispatch(request, *args, **kwargs)
     
     def process_incorrect_answer(self, f, card):
@@ -142,6 +148,12 @@ class FlashCardResultView(LoginRequiredMixin, View):
         self.update_user_flashcard(f, card, rate)
         return render(self.request, self.template_false, {'flashcard': self.flashcard, 'is_correct': self.is_correct})
 
+    def process_invalid_answer(self):
+        return bool(
+            Card.from_dict(self.user_flashcard.card_data).due
+            >= datetime.now(timezone.utc)
+            and self.user_flashcard.review_log
+        )
 
     def update_user_flashcard(self, f, card, rate):
         review_log = (
@@ -154,16 +166,14 @@ class FlashCardResultView(LoginRequiredMixin, View):
         self.user_flashcard.review_log = review_log.to_dict()
         self.user_flashcard.save()
 
-
     def get(self, request, *args, **kwargs):
         f = FSRS()
         card = Card.from_dict(self.user_flashcard.card_data)
-        if card.due >= datetime.now(timezone.utc) and self.user_flashcard.review_log:
-                return redirect('home:flashcard_list')
-        if not self.is_correct:
-            return self.process_incorrect_answer(f, card)
-        else:
+        
+        if self.is_correct:
             return render(request, self.template_true, {'flashcard': self.flashcard, 'form': self.form_class(), 'is_correct': self.is_correct})
+        else:
+            return self.process_incorrect_answer(f, card)
     
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
@@ -173,11 +183,10 @@ class FlashCardResultView(LoginRequiredMixin, View):
             f = FSRS()
             card = Card.from_dict(self.user_flashcard.card_data)
             rate = Rating(rating)
-            if Card.from_dict(self.user_flashcard.card_data).due >= datetime.now(timezone.utc) and self.user_flashcard.review_log:
-                return redirect('home:flashcard_list')
+            
             self.update_user_flashcard(f, card, rate)
             messages.success(request, "Your review was successfully saved.")
             return redirect('home:flashcard_list')
         
         # If form is not valid, render the template again with errors
-        return render(request, self.template_name, {'flashcard': self.flashcard, 'form': form})
+        return render(request, self.template_true, {'flashcard': self.flashcard, 'form': form})
