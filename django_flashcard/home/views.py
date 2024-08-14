@@ -12,6 +12,9 @@ from api.models import FlashCard, UserFlashCard
 from fsrs import FSRS, Card, ReviewLog, Rating
 from datetime import datetime, timezone
 
+class HomeView(View):
+    def get(self, request):
+        return render(request, "home/home.html")
 
 class UserLoginView(View):
     form_class = UserLogInForm
