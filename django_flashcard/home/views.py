@@ -6,12 +6,11 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView, UpdateView
+from django.views.generic import CreateView, ListView
 from .forms import FlashCardForm, ReviewForm, AnswerForm
 from api.models import FlashCard, UserFlashCard
 from fsrs import FSRS, Card, ReviewLog, Rating
 from datetime import datetime, timezone
-# Create your views here.
 
 
 class UserLoginView(View):
@@ -69,14 +68,6 @@ class UserLogoutViwe(LoginRequiredMixin,View):
         messages.success(request, "user logout successfuly", "success")
         return redirect("home:home")
 
-class HomeView(View):
-    def get(self, request):
-        return render(request, "home/home.html")
-
-
-class ShowAnswerFlashcard(View):
-    def get(self, request):
-        pass
 
 class SuperUserRequiredMixin(UserPassesTestMixin):
     def test_func(self):
