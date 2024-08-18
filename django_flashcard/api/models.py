@@ -10,7 +10,7 @@ class FlashCard(models.Model):
         return self.question
 
 class UserFlashCard(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_flashcards")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="flashcards")
     flashcard = models.ForeignKey(FlashCard, on_delete=models.CASCADE, related_name="user_flashcards")
     card_data = models.JSONField(default=dict)
     review_log = models.JSONField(default=dict)
