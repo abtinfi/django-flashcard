@@ -15,5 +15,5 @@ class ApiRegister(APIView):
             )
             return Response(ser_data.data, status=201)
         
-        # If the data is not valid, return the errors with a 400 status code
         return Response(ser_data.errors, status=400)
+
