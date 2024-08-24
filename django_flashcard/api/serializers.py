@@ -15,3 +15,12 @@ class UserFlashcardSerializer(serializers.ModelSerializer):
         model = UserFlashCard
         fields = '__all__'
         
+
+class ReviewAnswerSerializer(serializers.Serializer):
+    flashcard_id = serializers.IntegerField()
+    rating = serializers.IntegerField(min_value=0, max_value=4)  # Assuming rating is between 0 and 4
+
+    def validate_flashcard_id(self, value):
+        if not FlashCard.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Invalid Flashcard ID")
+        return value

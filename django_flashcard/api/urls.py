@@ -6,7 +6,8 @@ urlpatterns = [
     path('register/', views.ApiRegister.as_view(), name="user_register"),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('flashcard/list/', views.FlashCardListAPIView.as_view(), name='flashcar_list' )
+    path('flashcard/list/', views.FlashCardListAPIView.as_view(), name='flashcar_list' ),
+    path('review/', views.ReviewAnswerAPIView.as_view(), name='review_answer')
 ]
 
 
