@@ -1,13 +1,18 @@
 from . import views
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 urlpatterns = [
     path('register/', views.ApiRegister.as_view(), name="user_register"),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('flashcard/list/', views.FlashCardListAPIView.as_view(), name='flashcar_list' ),
-    path('review/', views.ReviewAnswerAPIView.as_view(), name='review_answer')
+    path('review/', views.ReviewAnswerAPIView.as_view(), name='review_answer'),
+    path('schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    
 ]
 
 
