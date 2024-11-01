@@ -48,7 +48,6 @@ class FlashCardListAPIView(APIView):
         return Response(serializer.data)
     
 
-from fsrs import FSRS, Card, Rating
 
 class ReviewAnswerAPIView(APIView):
     def post(self, request):
@@ -67,11 +66,9 @@ class ReviewAnswerAPIView(APIView):
 
             card = Card.from_dict(user_flashcard.card_data)
 
-            # بررسی اینکه آیا زمان بررسی فلش‌کارت رسیده است یا نه
             if card.due > datetime.now(timezone.utc):
                 return Response({"detail": "It is not time to review this flashcard yet."}, status=status.HTTP_400_BAD_REQUEST)
 
-            # اگر زمان پاسخگویی رسیده است، پاسخ را ذخیره کنید
             f = FSRS()
             review_log = (
                 ReviewLog.from_dict(user_flashcard.review_log)
